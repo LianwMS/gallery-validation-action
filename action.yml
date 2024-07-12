@@ -1,0 +1,53 @@
+name: 'Gallery Standard Validation'
+description: 'Validate the standard of the gallery'
+inputs:
+  repositoryURL:  # id of input
+    description: 'The URL of the repository to validate'
+    required: true
+    default: ''
+  staticFiles: 
+    description: 'The static files need to be contains in the repository. Example: CONTRIBUTING.md, CODE_OF_CONDUCT.md, ISSUE_TEMPLATE.md, LICENSE, README.md, SECURITY.md'
+    required: false
+    default: 'CONTRIBUTING.md, CODE_OF_CONDUCT.md, ISSUE_TEMPLATE.md, LICENSE, README.md, SECURITY.md'
+  pipelines:
+    description: 'The pipelines need to be contains in the repository. Example: azure-dev.yml'
+    required: false
+    default: 'azure-dev.yml'
+  azd: 
+    description: 'If validate the Azure DevOps with azd up and down'
+    required: false
+    default: 'true'
+  securityTools:
+    description: 'The security tools need to be used to validate the repository. Example: msdo'
+    required: false
+    default: 'msdo'
+  topics:
+    description: 'The topics need to be contains in the repository. Example: azd-template, ai-azd-template'
+    required: false
+    default: ''
+  ReadmeH2:
+    description: 'The H2 need to be contains in the README.md. Example: Azure DevOps'
+    required: false
+    default: 'Azure DevOps'
+outputs:
+  resultFile:
+    description: "A file path to a results file."
+runs:
+  using: "composite"
+  steps:
+    - name: Git Clone Repository
+      run: git clone ${{ inputs.repositoryURL }}
+      shell: bash
+
+    - name: Install Python
+      run: sudo apt-get install python3
+      shell: bash
+
+    - name: Install Python Pip
+      run: sudo apt-get install python3-pip
+      shell: bash
+
+    - name: Run validation
+      run: |
+        python3 src/validate.py . --debug
+      shell: bash
