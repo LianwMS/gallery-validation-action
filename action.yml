@@ -36,7 +36,14 @@ runs:
   using: "composite"
   steps:
     - name: Git Clone Repository
-      run: git clone ${{ inputs.repositoryURL }}
+      run: |
+        cd ..
+        git clone ${{ inputs.repositoryURL }} candidate-repo
+        if [ -d "./candidate-repo/hooks" ] && [ "$(ls -A ./candidate-repo/hooks/*.sh 2>/dev/null)" ]; then
+          chmod +x ./candidate-repo/hooks/*.sh
+        else
+          echo "No hooks directory or no .sh files found in hooks directory"
+        fi
       shell: bash
 
     - name: Install Python
@@ -44,10 +51,13 @@ runs:
       shell: bash
 
     - name: Install Python Pip
-      run: sudo apt-get install python3-pip
+      run: | 
+        sudo apt-get install python3-pip
+        python -m pip install --upgrade pip
+        pip install -r .github/validator/requirements.txt
       shell: bash
 
     - name: Run validation
       run: |
-        python3 src/validate.py . --debug
+        python3 src/validator.py ./../candidate-repo/ --debug
       shell: bash
