@@ -1,0 +1,13 @@
+on: 
+
+jobs:
+  test_gallery_validation_job:
+    runs-on: ubuntu-latest
+    name: test gallery validation
+    steps:
+      - uses: actions/checkout@v4
+      - id: foo
+        uses: LianwMS/gallery-validation-action@main
+        with:
+          repositoryURL: 'https://github.com/Azure-Samples/azd-ai-starter.git'
+
