@@ -46,18 +46,20 @@ runs:
         fi
       shell: bash
 
-    - name: Install Python
-      run: sudo apt-get install python3
-      shell: bash
-
-    - name: Install Python Pip
+    - name: Install Python and related packages
       run: | 
-        sudo apt-get install python3-pip
+        sudo apt-get install python3
         python -m pip install --upgrade pip
-        pip install -r .github/validator/requirements.txt
       shell: bash
 
     - name: Run validation
       run: |
-        python3 src/validator.py ./../candidate-repo/ --debug
+        dir
+        cd ..
+        dir
+        cd candidate-repo
+        dir
+        pip install -r .github/validator/requirements.txt
+        dir
+        python3 ../gallery-validation-action/src/validator.py . --debug
       shell: bash
