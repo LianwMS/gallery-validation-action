@@ -52,8 +52,8 @@ class FileValidtor:
                                         message=f"{potential_name} File", detail_messages=line_delimiter.join(submessages)))
                                 return result, line_delimiter.join(messages)
 
-        messages.append(ItemResultFormat.FAIL.format(message=f"{
-                        potential_name} File", detail_messages=f"- Error: {potential_name} file is missing."))
+        messages.append(ItemResultFormat.FAIL.format(message=f"{potential_name} File",
+                                                     detail_messages=f"- Error: {potential_name} file is missing."))
         return False, line_delimiter.join(messages)
 
 
@@ -388,8 +388,7 @@ def check_security_requirements(repo_path, msdo_result_file):
 
 def internal_validator(repo_path, check_azd_up, check_azd_down, topics, msdo_result_file):
     if not os.path.isdir(repo_path):
-        raise Exception(f"Error: The path {
-                        repo_path} is not a valid directory.")
+        raise Exception(f"Error: The path {repo_path} is not a valid directory.")
         return
 
     final_result = True
