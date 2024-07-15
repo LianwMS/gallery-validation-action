@@ -54,12 +54,7 @@ runs:
 
     - name: Run validation
       run: |
-        dir
-        cd ..
-        dir
-        cd candidate-repo
-        dir
+        cd ../candidate-repo
         pip install -r .github/validator/requirements.txt
-        dir
         python3 ../gallery-validation-action/src/validator.py . --debug
       shell: bash

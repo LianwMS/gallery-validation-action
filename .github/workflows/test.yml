@@ -1,5 +1,8 @@
 on: 
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   test_gallery_validation_job:

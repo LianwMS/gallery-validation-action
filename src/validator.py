@@ -16,8 +16,7 @@ class FileValidtor:
         self.h2Tags = h2Tags
 
     def validate(self):
-        logging.debug(f"Checking for file {self.name} with {self.extensionList} under {
-                      self.rootFolder} in {self.folderList} with case sensitive {self.caseSensitive}..")
+        logging.debug(f"Checking for file {self.name} with {self.extensionList} under {self.rootFolder} in {self.folderList} with case sensitive {self.caseSensitive}..")
         result = False
         messages = []
         potential_name = self.name if self.extensionList[0] == "" else self.name + \
