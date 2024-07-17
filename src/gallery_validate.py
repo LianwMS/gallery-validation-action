@@ -4,58 +4,8 @@ import subprocess
 import logging
 import yaml
 from sarif import loader
-
-
-class FileValidtor:
-    def __init__(self, name, extensionList, rootFolder, folderList, caseSensitive, h2Tags):
-        self.name = name
-        self.extensionList = extensionList
-        self.rootFolder = rootFolder
-        self.folderList = folderList
-        self.caseSensitive = caseSensitive
-        self.h2Tags = h2Tags
-
-    def validate(self):
-        logging.debug(f"Checking for file {self.name} with {self.extensionList} under {self.rootFolder} in {self.folderList} with case sensitive {self.caseSensitive}..")
-        result = False
-        messages = []
-        potential_name = self.name if self.extensionList[0] == "" else self.name + \
-            "." + self.extensionList[0]
-
-        for root, dirs, files in os.walk(self.rootFolder):
-            # print('{}; {}; {}'.format(root, dirs, files))
-            for folder in self.folderList:
-                candidateFolder = self.rootFolder if folder == "" else os.path.join(
-                    self.rootFolder, folder)
-                if ((self.caseSensitive == False and candidateFolder.lower() == root.lower()) or (self.caseSensitive == True and root == candidateFolder)):
-                    for extension in self.extensionList:
-                        candidateFile = self.name if extension == "" else self.name + "." + extension
-                        for file in files:
-                            if ((self.caseSensitive == False and file.lower() == candidateFile.lower()) or (self.caseSensitive == True and file == candidateFile)):
-                                result = True
-                                logging.debug(f"- {file} is found in {root}.")
-                                submessages = []
-                                if self.h2Tags is not None:
-                                    with open(os.path.join(root, file), 'r') as fileContent:
-                                        content = fileContent.read()
-                                        for tag in self.h2Tags:
-                                            if tag not in content:
-                                                result = result and False
-                                                submessages.append(
-                                                    f"- Error: {tag} is missing in {file}.")
-                                    fileContent.close()
-                                if result:
-                                    messages.append(ItemResultFormat.PASS.format(
-                                        message=f"{potential_name} File"))
-                                else:
-                                    messages.append(ItemResultFormat.FAIL.format(
-                                        message=f"{potential_name} File", detail_messages=line_delimiter.join(submessages)))
-                                return result, line_delimiter.join(messages)
-
-        messages.append(ItemResultFormat.FAIL.format(message=f"{potential_name} File",
-                                                     detail_messages=f"- Error: {potential_name} file is missing."))
-        return False, line_delimiter.join(messages)
-
+from validator.file_validator import *
+from constants import *
 
 root_folder = "."
 github_folder = ".github"
@@ -98,30 +48,8 @@ expected_topics = ["azd-templates", "ai-azd-templates"]
 security_actions = ['microsoft/security-devops-action',
                     'github/codeql-action/upload-sarif']
 
-line_delimiter = "\n"
-details_help_link = "https://aka.ms/ai-template-standards"
 
 
-class Signs:
-    CHECK = ":heavy_check_mark:"
-    BLOCK = ":x:"
-    WARNING = ":warning:"
-
-
-how_to_fix = "## <i>How to fix?</i>\n<b>The full Definition of Done of the AI-Gallery template and fix approached can be found [HERE]({detail_link}).</b>".format(
-    detail_link=details_help_link)
-
-final_result_format = "# AI Gallery Standard Validation: {{result}} \n{{message}}\n\n{end_message}".format(
-    link=details_help_link, end_message=how_to_fix)
-
-
-class ItemResultFormat:
-    PASS = "<details><summary>{sign} <b>{{message}}</b>.</summary></details>".format(
-        sign=Signs.CHECK)
-    FAIL = "<details><summary>{sign} <b>{{message}}</b>. <a href={detail_link}>[How to fix?]</a></summary>\n\n{{detail_messages}}\n\n</details>".format(
-        sign=Signs.BLOCK, detail_link=details_help_link)
-    WARNING = "<details><summary>{sign} <b>{{message}}</b>. <a href={detail_link}>[How to fix?]</a></summary>\n\n{{detail_messages}}\n\n</details>".format(
-        sign=Signs.WARNING, detail_link=details_help_link)
 
 
 def check_msdo_result(msdo_result_file):
@@ -281,18 +209,12 @@ def check_folder_existence(repo_path, folder_name):
 def check_repository_management(repo_path, topics):
 
     repository_management_validators = [
-        FileValidtor(readme_file, [markdown_file_extension],
-                     repo_path, [""], False, readme_h2_tags),
-        FileValidtor(license_file, [markdown_file_extension, ""], repo_path, [
-            ""], False, None),
-        FileValidtor(security_file, [markdown_file_extension], repo_path, [
-            ""], False, None),
-        FileValidtor(code_of_conduct_file, [markdown_file_extension], repo_path, [
-            github_folder, ""], False, None),
-        FileValidtor(contributing_file, [
-            markdown_file_extension], repo_path, ["", github_folder], False, None),
-        FileValidtor(issue_template_file, [markdown_file_extension], repo_path, [
-            github_folder], False, None)
+        FileValidtor("repository_management", False, readme_file, [markdown_file_extension], repo_path, [""], False, readme_h2_tags),
+        FileValidtor("repository_management", False, license_file, [markdown_file_extension, ""], repo_path, [""], False, None),
+        FileValidtor("repository_management", False, security_file, [markdown_file_extension], repo_path, [""], False, None),
+        FileValidtor("repository_management", False, code_of_conduct_file, [markdown_file_extension], repo_path, [github_folder, ""], False, None),
+        FileValidtor("repository_management", False, contributing_file, [markdown_file_extension], repo_path, ["", github_folder], False, None),
+        FileValidtor("repository_management", False, issue_template_file, [markdown_file_extension], repo_path, [github_folder], False, None)
     ]
 
     final_result = True
@@ -314,9 +236,9 @@ def check_repository_management(repo_path, topics):
 
 def check_source_code_structure(repo_path):
     source_code_structure_validators = [
-        FileValidtor(azure_dev_workflow_file, [yaml_file_extension, yaml_file_extension2], repo_path, [
+        FileValidtor("source_code_structure", False, azure_dev_workflow_file, [yaml_file_extension, yaml_file_extension2], repo_path, [
             os.path.join(github_folder, workflows_folder)], False, None),
-        FileValidtor(infra_yaml_file, [
+        FileValidtor("source_code_structure", False, infra_yaml_file, [
             yaml_file_extension, yaml_file_extension2], repo_path, [""], False, None),
     ]
     final_result = True
